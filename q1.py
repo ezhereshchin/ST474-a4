@@ -22,34 +22,34 @@ def integrand(x):
 #b
 vIntegrand = np.vectorize(integrand, otypes=[np.float])
 
-n=1000
+n=1000000
 half = n//2
 crudeIn = np.random.rand(1,n)
 antithIn1 = np.random.rand(1,half)
 antithIn2 = np.subtract(1,antithIn1)
-antithIn = np.concatenate((antithIn1,antithIn2),axis=0)
+
 
 
 crudeMC = vIntegrand(crudeIn)
-antithMC = vIntegrand(antithIn)
-curdeEst = np.mean(crudeMC)
-antithEst = np.mean(antithMC)
+crudeEst = np.mean(crudeMC)
 crudeVar = np.var(crudeMC)
-antithVar = np.var(antithMC)
-efficiency = antithVar/crudeVar
+seCrude = math.sqrt(crudeVar/n)
+leftCrude = crudeEst - seCrude
+rightCrude = crudeEst + seCrude
 
-print("The Crude Monte Carlo Estimator is {}".format(curdeEst))
+antithMC = (vIntegrand(antithIn1) + vIntegrand(antithIn2))/2
+antithEst = np.mean(antithMC)
+antithVar = np.var(antithMC)
+seAntith = math.sqrt(antithVar/n)
+leftAntith = antithEst - seAntith
+rightAntith = antithEst + seAntith
+
+efficiency = crudeVar/antithVar
+
+print("The Crude Monte Carlo Estimator is {}".format(crudeEst))
 print("The Antithetic Monte Carlo Estimator is {}".format(antithEst))
 print("The Crude Monte Carlo Variance is {}".format(crudeVar))
 print("The Antithetic Monte Carlo Variance is {}".format(antithVar))
 print("The efficiency is {}".format(efficiency))
-
-
-%Antithetic Estimator
-u=rand(1,500000);
-Ansim=0.5.*(fn_call_integrand(u)+fn_call_integrand(1-u));
-pr_An=mean(Ansim);
-var_pr_An=var(Ansim);
-se_pr_An=sqrt(var(Ansim)./length(u));
-CI_An=[pr_An-1.96*se_pr_An pr_An+1.96*se_pr_An];
-Eff_An=var_pr_CR./(var_pr_An);
+print("The Crude Monte Carlo 95% CI is ({},{})".format(leftCrude,rightCrude))
+print("The Antithetic Monte Carlo 95% CI is ({},{})".format(leftAntith,rightAntith))
