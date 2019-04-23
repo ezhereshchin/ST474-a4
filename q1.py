@@ -235,7 +235,7 @@ def stranMC(u):
 
 def impMC(u): #using g(x)=2x
     g = np.sqrt(u)
-    return vIntegrand(g)/2*g
+    return vIntegrand(g)/u
 
 def contrMC(u):
     return vIntegrand(u)-(u-0.5)
@@ -252,23 +252,28 @@ def lin_comb():
     linIn = np.random.rand(1, n)
     T1 = vAnMC(linIn)
     T2 = vstranMC(linIn)
-    T3 = vimpMC(linIn)
+    #T3 = vimpMC(linIn)
     T4 = vcontrMC(linIn)
-    X = np.array([T1,T2,T3,T4])
-    print(np.mean(X))
+    X = np.squeeze(np.array([T1,T2,T4]))
+    #print(np.mean(X))
     V = np.cov(X)
-    print(V)
-    # linMC = 0
-    # linEst = np.mean(linMC)
-    # linVar = np.var(linMC)
-    # seLin = 1.96 * (np.sqrt(linVar/n))
-    # leftLin = linEst - seLin
-    # rightLin = linEst + seLin
-    # linInterval = (leftLin, rightLin)
-    # return (linEst, linVar, linInterval)
-    return
+    V1 = np.linalg.inv(V)
+    ones = np.ones((3,1))
+    left = np.matmul(V1,ones)
+    right = np.matmul(np.matrix.transpose(ones),V1)
+    right = np.matmul(right,ones)
+    b = np.divide(left,right)
+    linMC = T1*b[0]+T2*b[1]+T4*b[2]
+    linEst = np.mean(linMC)
+    linVar = 1/right
+    seLin = 1.96 * (np.sqrt(linVar/n))
+    leftLin = linEst - seLin
+    rightLin = linEst + seLin
+    linInterval = (leftLin, rightLin)
+    return (linEst, linVar, linInterval)
 # b = [0.25,0.25,0.25,0.25]
 # result = lin_comb(*b)
 # print(result[0],crude()[1]/result[1])
     
-lin_comb()
+result = lin_comb()
+print(result[0],crude()[1]/result[1])
