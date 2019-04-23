@@ -98,3 +98,49 @@ print(antEfficiency)
 # # #
 # Importance Estimators
 # # #
+
+def importanceEstimator(x0, u, d, p, q, th, n):
+    trials = np.empty(n)
+    for i in range(n):
+        uPath = np.random.uniform(0, 1, th)
+        vector = vBernoulli(uPath, q)
+        process = mbModel(x0, u, d, p, th, vector=vector)
+        s = np.sum(vector)
+        trials[i] = indicator(process) * ( (p/q) ** s) * ( ((1-p)/(1-q)) ** (th - s) )
+    return trials
+
+q = 0.65
+trials = importanceEstimator(x0, u, d, p, q, th, n)
+expectedValue = np.mean(trials)
+sampleVariance = np.var(trials, ddof=1)
+leftSide = expectedValue - 1.96 * np.sqrt(sampleVariance / n)
+rightSide = expectedValue + 1.96 * np.sqrt(sampleVariance / n)
+confidenceInterval = (leftSide, rightSide)
+imp = (expectedValue, sampleVariance, confidenceInterval)
+impEfficiency = crude[1]/imp[1]
+print(imp)
+print(impEfficiency)
+
+q = 0.5
+trials = importanceEstimator(x0, u, d, p, q, th, n)
+expectedValue = np.mean(trials)
+sampleVariance = np.var(trials, ddof=1)
+leftSide = expectedValue - 1.96 * np.sqrt(sampleVariance / n)
+rightSide = expectedValue + 1.96 * np.sqrt(sampleVariance / n)
+confidenceInterval = (leftSide, rightSide)
+imp = (expectedValue, sampleVariance, confidenceInterval)
+impEfficiency = crude[1]/imp[1]
+print(imp)
+print(impEfficiency)
+
+q = 0.35
+trials = importanceEstimator(x0, u, d, p, q, th, n)
+expectedValue = np.mean(trials)
+sampleVariance = np.var(trials, ddof=1)
+leftSide = expectedValue - 1.96 * np.sqrt(sampleVariance / n)
+rightSide = expectedValue + 1.96 * np.sqrt(sampleVariance / n)
+confidenceInterval = (leftSide, rightSide)
+imp = (expectedValue, sampleVariance, confidenceInterval)
+impEfficiency = crude[1]/imp[1]
+print(imp)
+print(impEfficiency)
