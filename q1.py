@@ -75,10 +75,11 @@ def strat(a,split):
 
     #Strsim=a*fn_call_integrand(a*rand(1,500000))+(1-a)*fn_call_integrand(a+(1-a)*rand(1,500000));
     
-    stratMC1 = a*vIntegrand(stratIn1)
-    stratMC2 = (1-a)*vIntegrand(stratIn2)
-    stratMC = np.concatenate([stratMC1,stratMC2],axis=1)
-    print(stratMC.shape)
+    # stratMC1 = a*vIntegrand(stratIn1)
+    # stratMC2 = (1-a)*vIntegrand(stratIn2)
+    # stratMC = np.concatenate([stratMC1,stratMC2],axis=1)
+    stratMC = a*vIntegrand(stratIn1) + (1-a)*vIntegrand(stratIn2)
+    #print(stratMC)
     stratEst = np.mean(stratMC)
     stratVar = np.var(stratMC)
     seStrat = 1.96*math.sqrt(stratVar/n)
@@ -101,8 +102,5 @@ def strat(a,split):
 # split = 0.5
 
 
-#efficiencies = [strat(a,split) for a in np.arange(0.01,1,0.01) for split in np.arange(0.05,1,0.05)]
-#print(max(efficiencies, key = lambda item:item[2]))
-
-
-print(strat(0.5,0.5))
+efficiencies = [strat(a,0.5) for a in np.arange(0.5,0.7,0.001)]
+print(max(efficiencies, key = lambda item:item[2]))
