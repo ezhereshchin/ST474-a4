@@ -76,6 +76,33 @@ print(crude)
 # Antithetic Estimator
 # # #
 
+# Plot 3 Antithetic paths
+fig = plt.figure()
+ax = fig.add_subplot(111)
+ax.set_ylabel("X")
+ax.set_xlabel("Time")
+markers = ["^", "^", "^"]
+colours = [
+    ("r", "c"),
+    ("b", "y"),
+    ("g", "m")
+]
+labels = [
+    ("Path 1", "A-Path 1"),
+    ("Path 2", "A-Path 2"),
+    ("Path 3", "A-Path 3")
+]
+for i in range(3):
+    path = np.random.uniform(0, 1, th)
+    process = mbModel(x0, u, d, p, th, vector = vBernoulli(path, p))
+    antProcess = mbModel(x0, u, d, p, th, vector = vBernoulli(vAntith(path), p))
+    ax.scatter(np.arange(0, 20 + 1), process, marker = markers[i], c = colours[i][0], label = labels[i][0])
+    ax.scatter(np.arange(0, 20 + 1), antProcess, marker = markers[i], c = colours[i][1], label = labels[i][1])
+    
+plt.legend(loc='upper left')
+plt.show()
+
+
 trials = np.empty(n//2)
 for i in range(n//2):
     path = np.random.uniform(0, 1, th)
