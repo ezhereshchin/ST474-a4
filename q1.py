@@ -55,38 +55,54 @@ n = 1000
 # print("The Antithetic Monte Carlo 95% CI is ({},{})".format(leftAntith,rightAntith))
 
 # d
-a = 0.5
-split = 0.5
-first = round(n*0.5)
-second = n-first
+def strat(a,split):
+    n=1000
+    first = int(n*split)
+    second = n-first
+    crudeIn = np.random.rand(1, n)
 
-crudeIn = np.random.rand(1, n)
-stratIn1 = np.random.rand(1, first)
-stratIn1 = stratIn1*a
-stratIn2 = np.random.rand(1, second)
-stratIn2 = a + stratIn1*(1-a)
+    stratIn1 = np.random.rand(1, first)
+    stratIn1 = stratIn1*a
+    stratIn2 = np.random.rand(1, second)
+    stratIn2 = a + (1-a)*stratIn2
 
-crudeMC = vIntegrand(crudeIn)
-crudeEst = np.mean(crudeMC)
-crudeVar = np.var(crudeMC)
-seCrude = 1.96*math.sqrt(crudeVar/n)
-leftCrude = crudeEst - seCrude
-rightCrude = crudeEst + seCrude
+    crudeMC = vIntegrand(crudeIn)
+    crudeEst = np.mean(crudeMC)
+    crudeVar = np.var(crudeMC)
+    seCrude = 1.96*math.sqrt(crudeVar/n)
+    leftCrude = crudeEst - seCrude
+    rightCrude = crudeEst + seCrude
+
+    #Strsim=a*fn_call_integrand(a*rand(1,500000))+(1-a)*fn_call_integrand(a+(1-a)*rand(1,500000));
+    
+    stratMC1 = a*vIntegrand(stratIn1)
+    stratMC2 = (1-a)*vIntegrand(stratIn2)
+    stratMC = np.concatenate([stratMC1,stratMC2],axis=1)
+    print(stratMC.shape)
+    stratEst = np.mean(stratMC)
+    stratVar = np.var(stratMC)
+    seStrat = 1.96*math.sqrt(stratVar/n)
+    leftStrat = stratEst - seStrat
+    rightStrat = stratEst + seStrat
+
+    efficiency = crudeVar/stratVar
+
+    # print("The Crude Monte Carlo Estimator is {}".format(crudeEst))
+    # print("The Stratified Monte Carlo Estimator is {}".format(stratEst))
+    # print("The Crude Monte Carlo Variance is {}".format(crudeVar))
+    # print("The Stratified Monte Carlo Variance is {}".format(stratVar))
+    # print("The efficiency is {}".format(efficiency))
+    # print("The Crude Monte Carlo 95% CI is ({},{})".format(leftCrude, rightCrude))
+    # print("The Stratified Monte Carlo 95% CI is ({},{})".format(leftStrat, rightStrat))
+    return (a,split,efficiency,crudeEst,stratEst)
 
 
-stratMC = a*vIntegrand(stratIn1) + (1-a)*vIntegrand(stratIn2)
-stratEst = np.mean(stratMC)
-stratVar = np.var(stratMC)
-seStrat = 1.96*math.sqrt(stratVar/n)
-leftStrat = stratEst - seStrat
-rightStrat = stratEst + seStrat
+# a = 0.8
+# split = 0.5
 
-efficiency = crudeVar/stratVar
 
-print("The Crude Monte Carlo Estimator is {}".format(crudeEst))
-print("The Stratified Monte Carlo Estimator is {}".format(stratEst))
-print("The Crude Monte Carlo Variance is {}".format(crudeVar))
-print("The Stratified Monte Carlo Variance is {}".format(stratVar))
-print("The efficiency is {}".format(efficiency))
-print("The Crude Monte Carlo 95% CI is ({},{})".format(leftCrude, rightCrude))
-print("The Stratified Monte Carlo 95% CI is ({},{})".format(leftStrat, rightStrat))
+#efficiencies = [strat(a,split) for a in np.arange(0.01,1,0.01) for split in np.arange(0.05,1,0.05)]
+#print(max(efficiencies, key = lambda item:item[2]))
+
+
+print(strat(0.5,0.5))
