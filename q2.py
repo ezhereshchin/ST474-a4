@@ -78,10 +78,16 @@ print(crude)
 
 # Plot 3 Antithetic paths
 fig = plt.figure()
-ax = fig.add_subplot(111)
-ax.set_ylabel("X")
-ax.set_xlabel("Time")
+axes = (fig.add_subplot(121), fig.add_subplot(122))
+
+axes[0].set_xlabel("Time")
+axes[0].set_ylabel("X")
+
+axes[1].set_xlabel("Time")
+axes[1].set_ylabel("m")
+
 markers = ["^", "^", "^"]
+mMarkers = ["^", "^", "^"]
 colours = [
     ("r", "c"),
     ("b", "y"),
@@ -92,15 +98,28 @@ labels = [
     ("Path 2", "A-Path 2"),
     ("Path 3", "A-Path 3")
 ]
-for i in range(3):
-    path = np.random.uniform(0, 1, th)
-    process = mbModel(x0, u, d, p, th, vector = vBernoulli(path, p))
-    antProcess = mbModel(x0, u, d, p, th, vector = vBernoulli(vAntith(path), p))
-    ax.scatter(np.arange(0, 20 + 1), process, marker = markers[i], c = colours[i][0], label = labels[i][0])
-    ax.scatter(np.arange(0, 20 + 1), antProcess, marker = markers[i], c = colours[i][1], label = labels[i][1])
+# for i in range(3):
+#     path = np.random.uniform(0, 1, th)
+#     process = mbModel(x0, u, d, p, th, vector = vBernoulli(path, p))
+#     antProcess = mbModel(x0, u, d, p, th, vector = vBernoulli(vAntith(path), p))
+#     axes[0].scatter(np.arange(0, th + 1), process, marker = markers[i], c = colours[i][0], label = labels[i][0])
+#     axes[0].scatter(np.arange(0, th + 1), antProcess, marker = markers[i], c = colours[i][1], label = labels[i][1])
+#     # Generate running min of path
+#     mins = np.empty(th + 1)
+#     antMins = np.empty(th + 1)
+#     for j in range(0,th+1):
+#         mins[j] = runningMin(process, j, th)
+#         antMins[j] = runningMin(antProcess, j, th)
+#     axes[1].scatter(np.arange(0, th + 1), mins, marker = mMarkers[i], c = colours[i][0], label = labels[i][0])
+#     axes[1].scatter(np.arange(0, th + 1), antMins, marker = mMarkers[i], c = colours[i][1], label = labels[i][1])
     
-plt.legend(loc='upper left')
-plt.show()
+# axes[0].legend(loc = "upper left")
+# axes[1].legend(loc = "lower left")
+
+# plt.show()
+# plt.clf()
+
+
 
 
 trials = np.empty(n//2)
@@ -126,6 +145,32 @@ print(antEfficiency)
 # Importance Estimators
 # # #
 
+# Generating sample paths
+
+# axes = (fig.add_subplot(121), fig.add_subplot(122))
+
+path = np.random.uniform(0, 1, th)
+ps = [0.65, 0.5, 0.35]
+for i in range(3):
+    # path = np.random.uniform(0, 1, th)
+    process = mbModel(x0, u, d, p, th, vector = vBernoulli(path, ps[i]))
+    # antProcess = mbModel(x0, u, d, p, th, vector = vBernoulli(vAntith(path), p))
+    axes[0].scatter(np.arange(0, th + 1), process, marker = markers[i], c = colours[i][0], label = labels[i][0])
+    # axes[0].scatter(np.arange(0, th + 1), antProcess, marker = markers[i], c = colours[i][1], label = labels[i][1])
+    # Generate running min of path
+    mins = np.empty(th + 1)
+    antMins = np.empty(th + 1)
+    for j in range(0,th+1):
+        mins[j] = runningMin(process, j, th)
+        # antMins[j] = runningMin(antProcess, j, th)
+    axes[1].scatter(np.arange(0, th + 1), mins, marker = mMarkers[i], c = colours[i][0], label = labels[i][0])
+    # axes[1].scatter(np.arange(0, th + 1), antMins, marker = mMarkers[i], c = colours[i][1], label = labels[i][1])
+
+axes[0].legend(loc = "upper left")
+axes[1].legend(loc = "upper right")
+
+plt.show()
+
 def importanceEstimator(x0, u, d, p, q, th, n):
     trials = np.empty(n)
     for i in range(n):
@@ -135,18 +180,6 @@ def importanceEstimator(x0, u, d, p, q, th, n):
         s = np.sum(vector)
         trials[i] = indicator(process) * ( (p/q) ** s) * ( ((1-p)/(1-q)) ** (th - s) )
     return trials
-
-q = 0.65
-trials = importanceEstimator(x0, u, d, p, q, th, n)
-expectedValue = np.mean(trials)
-sampleVariance = np.var(trials, ddof=1)
-leftSide = expectedValue - 1.96 * np.sqrt(sampleVariance / n)
-rightSide = expectedValue + 1.96 * np.sqrt(sampleVariance / n)
-confidenceInterval = (leftSide, rightSide)
-imp = (expectedValue, sampleVariance, confidenceInterval)
-impEfficiency = crude[1]/imp[1]
-print(imp)
-print(impEfficiency)
 
 q = 0.5
 trials = importanceEstimator(x0, u, d, p, q, th, n)
