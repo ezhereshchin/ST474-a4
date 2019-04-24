@@ -2,6 +2,7 @@ import math
 from matplotlib import pyplot as plt
 import numpy as np
 
+N = 10000
 
 def integrand(x):
     return (math.exp(x)-1)/(math.exp(1)-1)
@@ -16,14 +17,17 @@ def plotIntegrand():
     x = np.arange(0, 1, 0.001)
     result = map(integrand, x)
     y = [i for i in result]
-    plt.plot(x, y)
-    plt.legend()
-    plt.plot(x, x)
+    plt.plot(x, y, label = "f(x)")
+    plt.plot(x, x, label = "g(x)=x")
     plt.xlim(xmin=0, xmax=1)
     plt.ylim(ymin=0, ymax=1)
+    plt.title("Integrand vs g(x)=x")
+    plt.xlabel("x")
+    plt.ylabel("f(x)")
+    plt.legend( )
     plt.show()
     return
-
+# plotIntegrand()
 # b
 
 
@@ -43,7 +47,7 @@ def crude():
     # print("The Crude Monte Carlo 95% CI is ({},{})".format(leftCrude,rightCrude))
     return (crudeEst, crudeVar, crudeInterval)
 
-
+#c
 def anti():
     global N
     n = N
@@ -207,7 +211,7 @@ def control(beta):
 
 # result = control(1)
 # print(result[0],crude()[1]/result[1])
-N = 10000
+
 
 # def impMC():
 #     global N
@@ -235,7 +239,7 @@ def stranMC(u):
 
 def impMC(u): #using g(x)=2x
     g = np.sqrt(u)
-    return vIntegrand(g)/u
+    return vIntegrand(g)/u*2
 
 def contrMC(u):
     return vIntegrand(u)-(u-0.5)
@@ -252,28 +256,26 @@ def lin_comb():
     linIn = np.random.rand(1, n)
     T1 = vAnMC(linIn)
     T2 = vstranMC(linIn)
-    #T3 = vimpMC(linIn)
+    T3 = vimpMC(linIn)
     T4 = vcontrMC(linIn)
-    X = np.squeeze(np.array([T1,T2,T4]))
-    #print(np.mean(X))
+    X = np.squeeze(np.array([T1,T2,T3,T4]))
     V = np.cov(X)
     V1 = np.linalg.inv(V)
-    ones = np.ones((3,1))
+    ones = np.ones((X.shape[0],1))
     left = np.matmul(V1,ones)
     right = np.matmul(np.matrix.transpose(ones),V1)
     right = np.matmul(right,ones)
     b = np.divide(left,right)
-    linMC = T1*b[0]+T2*b[1]+T4*b[2]
+    linMC = T1*b[0]+T2*b[1]+T3*b[2]+T4*b[3]
     linEst = np.mean(linMC)
     linVar = 1/right
     seLin = 1.96 * (np.sqrt(linVar/n))
     leftLin = linEst - seLin
     rightLin = linEst + seLin
     linInterval = (leftLin, rightLin)
-    return (linEst, linVar, linInterval)
-# b = [0.25,0.25,0.25,0.25]
-# result = lin_comb(*b)
-# print(result[0],crude()[1]/result[1])
+    return (linEst, linVar, linInterval, b)
+
     
-result = lin_comb()
-print(result[0],crude()[1]/result[1])
+# result = lin_comb()
+# print(result[0],result[3],crude()[1]/result[1])
+
